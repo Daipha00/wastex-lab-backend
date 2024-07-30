@@ -1,0 +1,24 @@
+server:
+  port: 8080
+
+spring:
+  main:
+    web-application-type: servlet
+  application:
+    name: wastex_lab
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    password: jmjgenero
+    url: jdbc:postgresql://localhost:5432/wasteX?currentSchema=public
+    username: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    show-sql: true
+
