@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 9090
 
 spring:
   main:
@@ -8,10 +8,11 @@ spring:
     name: wastex_lab
   datasource:
     driver-class-name: org.postgresql.Driver
-    password: jmjgenero
-    url: jdbc:postgresql://localhost:5432/wasteX?currentSchema=public
+    password: Agness@1973
+    url: jdbc:postgresql://localhost:8080/wastex?currentSchema=public
     username: postgres
   jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
     properties:
