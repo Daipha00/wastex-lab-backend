@@ -4,10 +4,13 @@ import com.suza.wasteX.DTO.*;
 import com.suza.wasteX.DTO.StatusDto.ActivityStatusRequest;
 import com.suza.wasteX.DTO.StatusDto.ActivityStatusResponse;
 import com.suza.wasteX.customException.NotFoundException;
+import com.suza.wasteX.projectActivity.ActivityRepository;
+import com.suza.wasteX.statuses.StatusRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +21,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class ActivityStatusService {
+    @Autowired
+    private StatusRepository statusRepository;
+
+    @Autowired
+    private ActivityRepository activityRepository;
+
     private final ActivityStatusRepository repository;
     private final ModelMapper modelMapper;
 

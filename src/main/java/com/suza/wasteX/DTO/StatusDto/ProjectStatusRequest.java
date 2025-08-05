@@ -11,6 +11,8 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class ProjectStatusRequest {
     private Long id;
+    private Long projectId;
+    private Long statusId;
     private LocalDate statusDate;
 }
 

@@ -27,6 +27,25 @@ import java.util.List;
 @Tag(name = "Project Activity API", description = "This is Api collection for managing Project activities")
 public class ActivityController {
     private final ActivityService activityService;
+
+    @Operation(
+            summary = "create a new activity",
+            description = "This endpoint is for creating a new activity under a given project"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Activity created successfully", content = {
+                    @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ActivityResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Bad request", content = @Content)
+    })
+    @PostMapping("/{projectId}")
+    public ResponseEntity<ActivityResponse> createActivity(
+            @PathVariable Long projectId,
+            @RequestBody ActivityRequest request) {
+        ActivityResponse response = activityService.createActivity(projectId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
     @Operation(
             summary = "get list of  an activity",
             description = "This endpoint is for getting list of an activity"

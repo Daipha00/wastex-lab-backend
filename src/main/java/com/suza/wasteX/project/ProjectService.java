@@ -44,12 +44,15 @@ public class ProjectService {
     public ProjectResponse createProject(ProjectRequest request) {
         Project project = modelMapper.map(request, Project.class);
 
-        List<Sponsor> sponsors = request.getProjectSponsor()
+        List<Sponsor> sponsors = Optional.ofNullable(request.getProjectSponsor())
+                .orElse(List.of()) // or `Collections.emptyList()`
                 .stream()
-                .map(id -> sponsorRepository.findById(id).orElseThrow(() -> {
-                    log.info("Sponsor with id {} is not found", id);
-                    return new NotFoundException("Sponsor id is not found");
-                })).toList();
+                .map(id -> sponsorRepository.findById(id)
+                        .orElseThrow(() -> {
+                            log.info("Sponsor with id {} is not found", id);
+                            return new NotFoundException("Sponsor id is not found");
+                        }))
+                .toList();
 
         if (request.getStatuses() != null) {
             Project finalProject = project;
@@ -69,10 +72,12 @@ public class ProjectService {
                     .collect(Collectors.toList());
             project.setStatuses(statuses);
         }
+
         project.setProjectSponsor(sponsors);
         project = projectRepository.save(project);
         return modelMapper.map(project, ProjectResponse.class);
     }
+
     @Transactional
     public ProjectResponse updateProject(Long id, ProjectRequest request) {
         Project project = projectRepository.findById(id)

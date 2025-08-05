@@ -45,6 +45,25 @@ public class ActivityService {
     private final ActivityStatusRepository activityStatusRepository;
     private final ModelMapper modelMapper;
 
+    @Transactional
+    public ActivityResponse createActivity(Long projectId, ActivityRequest request) {
+        // 1. Find the project
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new NotFoundException("Project with id " + projectId + " not found"));
+
+        // 2. Map request to entity
+        Activity activity = modelMapper.map(request, Activity.class);
+
+        // 3. Associate project to activity
+        activity.setProject(project);
+
+        // 4. Save the activity
+        Activity savedActivity = activityRepository.save(activity);
+
+        // 5. Return mapped response
+        return modelMapper.map(savedActivity, ActivityResponse.class);
+    }
+
     public List<ActivityResponse> getAllActivities() {
         List<Activity> activities = activityRepository.findAll();
         return activities.stream().map(activity -> modelMapper.map(activity, ActivityResponse.class)).collect(Collectors.toList());
