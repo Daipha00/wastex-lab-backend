@@ -15,7 +15,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -39,7 +41,7 @@ public class TypeService {
                     return new NotFoundException("Project id not found");
                 });
         Type type = modelMapper.map(request, Type.class);
-        type.setProject(project);
+        project.setType(type);
         type = repository.save(type);
         return modelMapper.map(type, TypeResponse.class);
     }
@@ -62,6 +64,24 @@ public class TypeService {
                     return new NotFoundException("Type id not found");
                 });
     }
+
+    public Map<String, Long> getProjectTypeCounts() {
+        Map<String, Long> counts = new HashMap<>();
+
+        Long hackathonCount = repository.countByNameIgnoreCase("hackathon");
+        Long incubationCount = repository.countByNameIgnoreCase("incubation");
+
+        counts.put("hackathon", hackathonCount);
+        counts.put("incubation", incubationCount);
+
+        return counts;
+    }
+
+    public Long getTotalTypesCount() {
+        return repository.count();  // counts all rows in project_type table
+    }
+
+
 
     public TypeResponse updateType(Long typeId, TypeRequest request) {
         Optional<Type> optionalType = repository.findById(typeId);

@@ -163,16 +163,30 @@ public ResponseEntity<ActivityResponse> addActivitySponsors(
         @ApiResponse(responseCode = "404" , description = "Activity not found", content = @Content),
         @ApiResponse(responseCode = "400", description = "Invalid request or CSV format", content = @Content)
 })
-@PostMapping(value = "/{activityId}/members", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+@PostMapping(value = "/{activityId}/members",
+        consumes = {MediaType.MULTIPART_FORM_DATA_VALUE},
+        produces = {MediaType.APPLICATION_JSON_VALUE})
 public ResponseEntity<List<MemberResponse>> uploadMembers(
         @PathVariable Long activityId,
         @RequestParam("file") MultipartFile file) {
     try {
         List<MemberResponse> members = activityService.uploadMembers(activityId, file);
         return ResponseEntity.ok(members);
-    } catch (IOException | CsvException e) {
+    } catch (IOException e) {
         return ResponseEntity.badRequest().build();
     }
 }
 
+    @GetMapping("/project/{projectId}")
+    @Operation(summary = "Get activities by project ID", description = "Retrieve all activities for a specific project")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "List of activities retrieved successfully",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ActivityResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Project not found")
+    })
+    public ResponseEntity<List<ActivityResponse>> getActivitiesByProjectId(@PathVariable Long projectId) {
+        List<ActivityResponse> activities = activityService.getActivitiesByProjectId(projectId);
+        return ResponseEntity.ok(activities);
+    }
 }

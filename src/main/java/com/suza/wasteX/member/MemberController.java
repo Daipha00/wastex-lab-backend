@@ -11,19 +11,23 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @RestController
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:4200")
 @RequestMapping("/api/v1/members/")
 @Tag(name = "Member API", description = "This is API collection for managing Member")
 public class MemberController {
     private final MemberService memberService;
+    private final ModelMapper modelMapper;
 
     @Operation(
             summary = "create a member",
@@ -89,25 +93,24 @@ public class MemberController {
     ResponseEntity<MemberResponse> getMemberById(@PathVariable Long id) {
         MemberResponse response = memberService.getMemberById(id);
         return response!= null ? ResponseEntity.ok(response) : ResponseEntity.notFound().build();
-
     }
 
-    @Operation(
-            summary = "update a member",
-            description = "This endpoint is for a member of a particular project activity"
-    )
-    @ApiResponses( {
-            @ApiResponse(responseCode = "200",description = "Member created successful", content = {
-                    @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = MemberResponse.class)) }),
-
-            @ApiResponse(responseCode = "404",description = "Member not Found", content = @Content)
-    })
-    @PutMapping("{activityId}/{id}")
-    ResponseEntity<MemberResponse> updateMember(@PathVariable Long activityId, @PathVariable Long id, @RequestBody MemberRequest request) {
-        MemberResponse response = memberService.updateMember(activityId,id,request);
-        return response!= null ? ResponseEntity.ok(response) : ResponseEntity.notFound().build();
-    }
+//    @Operation(
+//            summary = "update a member",
+//            description = "This endpoint is for a member of a particular project activity"
+//    )
+//    @ApiResponses( {
+//            @ApiResponse(responseCode = "200",description = "Member created successful", content = {
+//                    @Content(mediaType = "application/json",
+//                            schema = @Schema(implementation = MemberResponse.class)) }),
+//
+//            @ApiResponse(responseCode = "404",description = "Member not Found", content = @Content)
+//    })
+//    @PutMapping("{activityId}/{id}")
+//    ResponseEntity<MemberResponse> updateMember(@PathVariable Long activityId, @PathVariable Long id, @RequestBody MemberRequest request) {
+//        MemberResponse response = memberService.updateMember(activityId,id,request);
+//        return response!= null ? ResponseEntity.ok(response) : ResponseEntity.notFound().build();
+//    }
 
     @Operation(
             summary = "delete a member",
@@ -120,11 +123,73 @@ public class MemberController {
 
             @ApiResponse(responseCode = "404",description = "Member not Found", content = @Content)
     })
-    @DeleteMapping("/{id}")
+    @DeleteMapping("{id}")
     ResponseEntity<Void> deleteMember(@PathVariable Long id) {
         Boolean response = memberService.deleteMemberById(id);
         return response ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
 
+    @GetMapping("project/{projectId}")
+    public List<MemberResponse> getMembersByProject(@PathVariable Long projectId) {
+        List<Member> members = memberService.getMembersByProjectId(projectId);
+        return members.stream()
+                .map(member -> modelMapper.map(member, MemberResponse.class))
+                .collect(Collectors.toList());
+    }
+
+    @PostMapping("/project/{projectId}")
+    public ResponseEntity<MemberResponse> addMemberToProject(
+            @PathVariable Long projectId,
+            @RequestBody MemberRequest request
+    ) {
+        MemberResponse response = memberService.addMemberToProject(projectId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PutMapping("{memberId}/status")
+    public ResponseEntity<MemberResponse> updateMemberStatus(
+            @PathVariable Long memberId,
+            @RequestParam String status) {
+
+        MemberResponse response = memberService.updateStatus(memberId, status);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<MemberResponse> updateMember(
+            @PathVariable Long id,
+            @RequestBody MemberRequest request) {
+
+        MemberResponse response = memberService.updateMemberById(id, request);
+
+        return ResponseEntity.ok(response);
+    }
+
+//    @PutMapping("{id}")
+//    public ResponseEntity<MemberResponse> updateMember(
+//            @PathVariable Long id,
+//            @RequestBody MemberRequest request) {
+//
+//        MemberResponse response = memberService.updateMember(id, request);
+//        return ResponseEntity.ok(response);
+//    }
+
+    @GetMapping("me")
+    public List<MemberResponse> getMyParticipations(@RequestParam String email) {
+
+        List<Member> members = memberService.getMembersByEmail(email);
+
+        return members.stream()
+                .map(member -> {
+                    MemberResponse response = modelMapper.map(member, MemberResponse.class);
+
+                    if (member.getProject() != null) {
+                        response.setProjectName(member.getProject().getProjectName());
+                    }
+
+                    return response;
+                })
+                .toList();
     }
 
 }

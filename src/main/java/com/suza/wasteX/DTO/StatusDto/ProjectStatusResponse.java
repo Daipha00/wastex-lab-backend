@@ -5,11 +5,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.Date;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProjectStatusResponse {
     private Long id;
-   private LocalDate statusDate;
+   private Date statusDate;
 }

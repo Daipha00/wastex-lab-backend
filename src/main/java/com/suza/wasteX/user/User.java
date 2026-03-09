@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "_user")
+@Entity
 public class User {
     @Id
     @GeneratedValue(

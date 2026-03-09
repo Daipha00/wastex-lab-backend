@@ -49,7 +49,7 @@ public class FileUploadService {
                             .bucket(bucketName)
                             .object(fileName)
                             .stream(fileInputStream, file.getSize(), -1)
-                            .contentType(file.getContentType())
+//                            .contentType(file.getContentType())
                             .build()
             );
 

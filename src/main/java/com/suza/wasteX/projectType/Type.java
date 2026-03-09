@@ -13,20 +13,19 @@ import lombok.NoArgsConstructor;
 @Table(name = "project_type")
 public class Type {
     @Id
-    @SequenceGenerators(
-            @SequenceGenerator(
-                    name = "type_id_sequence",
-                    sequenceName = "type_id_sequence"
-            )
-    )
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "type_id_sequence")
+    @SequenceGenerator(
+            name = "type_id_sequence",
+            sequenceName = "type_id_sequence",
+            allocationSize = 1
     )
     @Column(name = "project_type_id")
     private Long id;
-    @Column(name = "project_type_name")
+
+    @Column(name = "project_type_name", unique = true)
     private String name;
-    @ManyToOne
-    @JoinColumn(name = "project")
-    private Project project;
+
+//    @ManyToOne
+//    @JoinColumn(name = "project_id")
+//    private Project project;
 }

@@ -1,5 +1,6 @@
 package com.suza.wasteX.wastex_site_api.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.suza.wasteX.DTO.WebsiteDTO.EventRequest;
 import com.suza.wasteX.DTO.WebsiteDTO.EventResponse;
 import com.suza.wasteX.customException.NotFoundException;
@@ -20,15 +21,18 @@ public class EventService {
     private final ModelMapper modelMapper;
     private final FileUploadService fileUploadService;
     private final EventRepository eventRepository;
+    private final ObjectMapper objectMapper;
 
 
     public EventResponse createEvent(String folderPath, String eventRequest, MultipartFile file) throws Exception {
-        Event event = modelMapper.map(eventRequest, Event.class);
+        EventRequest eventRequestObj = objectMapper.readValue(eventRequest, EventRequest.class); // <-- parse string
+        Event event = modelMapper.map(eventRequestObj, Event.class);
         String fileUrl = fileUploadService.uploadFile(folderPath,file);
         event.setPictureUrl(fileUrl);
         event = eventRepository.save(event);
         return modelMapper.map(event, EventResponse.class);
     }
+
 
     public EventResponse getEventById(Long id) {
         Event event = eventRepository.findById(id).orElseThrow(() -> new NotFoundException("Event not found"));

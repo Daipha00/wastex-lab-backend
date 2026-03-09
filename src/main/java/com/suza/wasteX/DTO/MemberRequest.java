@@ -6,8 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
 @AllArgsConstructor
@@ -22,5 +20,4 @@ public class MemberRequest {
         private String country;
         private String institution;
         private String phoneNumber;
-
 }

@@ -12,4 +12,8 @@ import java.util.Optional;
 public interface ActivityRepository extends JpaRepository<Activity, Long> {
     @Query("SELECT COUNT(a) FROM Activity a WHERE a.project.id = :projectId")
     Long countActivitiesByProjectId(@Param("projectId") Long projectId);
+
+    List<Activity> findByProjectId(Long projectId);
+
+
 }

@@ -22,7 +22,7 @@ public class ProjectResponse {
     private boolean active;
     private Date startDate;
     private Date endDate;
-    private List<TypeResponse> types;
+    private TypeResponse type;
     private List<ActivityResponse> activities;
     private List<ProjectStatusResponse> statuses;
 }

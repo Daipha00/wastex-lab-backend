@@ -71,25 +71,25 @@ public class StatusController {
         StatusResponse response = statusService.getStatusById(statusId);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
-
-    @Operation(
-            summary = "update a status",
-            description = "This endpoint is for update status"
-    )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200" , description = "Status created successfully", content = {
-                    @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = StatusRepository.class))}),
-            @ApiResponse(responseCode = "404", description = "status not found", content = @Content),
-            @ApiResponse(responseCode = "500", description = "Server Error", content = @Content)
-
-    })
-    @PutMapping("{statusId}")
-    ResponseEntity<StatusResponse> updateStatus(@PathVariable Long statusId, @RequestBody StatusRequest request) {
-        StatusResponse response = statusService.updateStatus(statusId, request);
-        return response != null ? ResponseEntity.ok(response) : ResponseEntity.notFound().build();
-
-    }
+//
+//    @Operation(
+//            summary = "update a status",
+//            description = "This endpoint is for update status"
+//    )
+//    @ApiResponses({
+//            @ApiResponse(responseCode = "200" , description = "Status created successfully", content = {
+//                    @Content(mediaType = "application/json",
+//                            schema = @Schema(implementation = StatusRepository.class))}),
+//            @ApiResponse(responseCode = "404", description = "status not found", content = @Content),
+//            @ApiResponse(responseCode = "500", description = "Server Error", content = @Content)
+//
+//    })
+//    @PutMapping("{statusId}")
+//    ResponseEntity<StatusResponse> updateStatus(@PathVariable Long statusId, @RequestBody StatusRequest request) {
+//        StatusResponse response = statusService.updateStatus(statusId, request);
+//        return response != null ? ResponseEntity.ok(response) : ResponseEntity.notFound().build();
+//
+//    }
     @Operation(
             summary = "delete a status",
             description = "This endpoint is for deleting status"

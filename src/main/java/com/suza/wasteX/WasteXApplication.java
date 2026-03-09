@@ -11,13 +11,15 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @SpringBootApplication(scanBasePackages = "com.suza.wasteX")
 @EnableJpaAuditing
 public class WasteXApplication {
-
-	@Bean
-	public ModelMapper modelMapper() {
-		return new ModelMapper();
-	}
+//
+//		@Bean
+//	public ModelMapper modelMapper() {
+//		return new ModelMapper();
+//	}
 	public static void main(String[] args) {
 		SpringApplication.run(WasteXApplication.class, args);
-	}
 
+
+
+	}
 }

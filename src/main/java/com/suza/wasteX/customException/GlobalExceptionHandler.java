@@ -24,8 +24,4 @@ public class GlobalExceptionHandler {
         errorResponse.put("status", HttpStatus.UNAUTHORIZED);
         return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
-
-
-
-
 }

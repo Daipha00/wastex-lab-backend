@@ -1,6 +1,7 @@
 package com.suza.wasteX.DTO;
 
 import com.suza.wasteX.member.Gender;
+import com.suza.wasteX.member.Member;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,4 +21,6 @@ public class MemberResponse {
     private String country;
     private String institution;
     private String phoneNumber;
+    private Member.MemberStatus status;
+    private String projectName;
 }

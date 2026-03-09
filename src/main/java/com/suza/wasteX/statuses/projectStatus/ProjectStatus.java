@@ -10,6 +10,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.Date;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -28,7 +29,7 @@ public class ProjectStatus extends Auditable {
     @JoinColumn(name = "project_status_id", nullable = false)
     private Status status;
     @Column(name = "status_date")
-    private LocalDate statusDate;
+    private Date statusDate;
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;

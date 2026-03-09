@@ -1,12 +1,10 @@
 package com.suza.wasteX.DTO;
 
 import com.suza.wasteX.DTO.StatusDto.ActivityStatusRequest;
-import com.suza.wasteX.statuses.activityStatus.ActivityStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.util.Date;
 import java.util.List;
 

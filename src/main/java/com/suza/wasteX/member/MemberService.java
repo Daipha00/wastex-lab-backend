@@ -3,6 +3,8 @@ package com.suza.wasteX.member;
 import com.suza.wasteX.DTO.MemberRequest;
 import com.suza.wasteX.DTO.MemberResponse;
 import com.suza.wasteX.customException.NotFoundException;
+import com.suza.wasteX.project.Project;
+import com.suza.wasteX.project.ProjectRepository;
 import com.suza.wasteX.projectActivity.Activity;
 import com.suza.wasteX.projectActivity.ActivityRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,19 +22,37 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final ActivityRepository activityRepository;
     private final ModelMapper modelMapper;
+    private final ProjectRepository projectRepository;
+    private final EmailService emailService;
 
     public MemberResponse createMember(Long activityId, MemberRequest request) {
-        Activity activity = activityRepository.findById(activityId)
-                .orElseThrow(()-> {
-                    log.info("Activity with id {} is not found", activityId);
-                    return new NotFoundException("Activity is not found");
-                });
 
-        Member member = modelMapper.map(request, Member.class);
-        member.setActivity(activity);
-        member = memberRepository.save(member);
-        return modelMapper.map(member, MemberResponse.class);
+        Activity activity = activityRepository.findById(activityId)
+                .orElseThrow(() -> new NotFoundException("Activity not found"));
+
+        Project project = activity.getProject();
+
+        if (project == null) {
+            throw new NotFoundException("Project not found for this activity");
+        }
+
+        Member savedMember = null;
+
+        List<Activity> projectActivities = activityRepository.findByProjectId(project.getId());
+
+        for (Activity act : projectActivities) {
+
+            Member member = modelMapper.map(request, Member.class);
+
+            member.setActivity(act);
+            member.setProject(project);   // ✅ THIS WAS MISSING
+
+            savedMember = memberRepository.save(member);
+        }
+
+        return modelMapper.map(savedMember, MemberResponse.class);
     }
+
     public List<MemberResponse> getMemberByActivity(Long activityId) {
                 activityRepository.findById(activityId)
                 .orElseThrow(() -> {
@@ -86,6 +106,28 @@ public class MemberService {
         }
      }
 
+    public MemberResponse updateMemberById(Long id, MemberRequest request) {
+
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Member not found"));
+
+        member.setFirstName(request.getFirstName());
+        member.setMiddleName(request.getMiddleName());
+        member.setLastName(request.getLastName());
+        member.setGender(request.getGender());
+        member.setAge(request.getAge());
+        member.setEmail(request.getEmail());
+        member.setCountry(request.getCountry());
+        member.setPhoneNumber(request.getPhoneNumber());
+        member.setInstitution(request.getInstitution());
+
+        memberRepository.save(member);
+
+        return modelMapper.map(member, MemberResponse.class);
+    }
+
+
+
     public Boolean deleteMemberById(Long id) {
         Optional<Member> memberOptional = memberRepository.findById(id);
         if(memberOptional.isPresent()) {
@@ -119,4 +161,70 @@ public class MemberService {
         return memberRepository.countFemaleMembersByActivityId(activityId);
     }
 
+    public List<Member> getMembersByProjectId(Long projectId) {
+        return memberRepository.findByProjectId(projectId);
+    }
+
+    public MemberResponse addMemberToProject(Long projectId, MemberRequest request) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        Member member = Member.builder()
+                .firstName(request.getFirstName())
+                .middleName(request.getMiddleName())
+                .lastName(request.getLastName())
+                .gender(request.getGender())
+                .age(request.getAge())
+                .email(request.getEmail())
+                .country(request.getCountry())
+                .institution(request.getInstitution())
+                .phoneNumber(request.getPhoneNumber())
+                .status(Member.MemberStatus.PENDING)
+                .project(project)
+                .build();
+
+        Member savedMember = memberRepository.save(member);
+
+        return mapToResponse(savedMember);
+    }
+
+    // inside MemberService
+    private MemberResponse mapToResponse(Member member) {
+        if (member == null) return null;
+
+        return MemberResponse.builder()
+                .id(member.getId())
+                .firstName(member.getFirstName())
+                .middleName(member.getMiddleName())
+                .lastName(member.getLastName())
+                .gender(member.getGender())
+                .age(member.getAge())
+                .email(member.getEmail())
+                .country(member.getCountry())
+                .institution(member.getInstitution())
+                .phoneNumber(member.getPhoneNumber())
+                .build();
+    }
+
+    public MemberResponse updateStatus(Long memberId, String status) {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("Member not found"));
+
+        member.setStatus(Member.MemberStatus.valueOf(status.toUpperCase()));
+
+        Member saved = memberRepository.save(member);
+
+        try {
+            emailService.sendStatusEmail(saved);
+        } catch (Exception e) {
+            System.out.println("Email failed: " + e.getMessage());
+        }
+
+        return modelMapper.map(saved, MemberResponse.class);
+    }
+
+    public List<Member> getMembersByEmail(String email) {
+        return memberRepository.findByEmail(email);
+    }
 }

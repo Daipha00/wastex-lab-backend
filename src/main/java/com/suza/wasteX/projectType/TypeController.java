@@ -15,9 +15,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("api/v1/types/")
+@CrossOrigin(origins = "http://localhost:4200")
 @RequiredArgsConstructor
 @Tag(name = "Project Type API", description = "This is Api collection for managing Project Type")
 public class TypeController {
@@ -70,6 +72,36 @@ public class TypeController {
         List<TypeResponse> response = typeService.getAllTypes();
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+
+    @Operation(
+            summary = "Get project counts by type",
+            description = "This endpoint counts how many projects exist for specific types (hackathon, incubation)"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Counts retrieved successfully",
+                    content = @Content(mediaType = "application/json"))
+    })
+    @GetMapping("counts")
+    public ResponseEntity<Map<String, Long>> getProjectTypeCounts() {
+        Map<String, Long> counts = typeService.getProjectTypeCounts();
+        return ResponseEntity.ok(counts);
+    }
+
+    @Operation(
+            summary = "Get total number of project types",
+            description = "This endpoint returns the total number of all registered project types"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Total count retrieved successfully",
+                    content = @Content(mediaType = "application/json"))
+    })
+    @GetMapping("total-count")
+    public ResponseEntity<Long> getTotalTypesCount() {
+        Long totalCount = typeService.getTotalTypesCount();
+        return ResponseEntity.ok(totalCount);
+    }
+
+
     @Operation(
             summary = "get an type",
             description = "This endpoint is for getting an type"

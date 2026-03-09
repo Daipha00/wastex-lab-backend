@@ -6,7 +6,6 @@ import com.suza.wasteX.DTO.WebsiteDTO.TestimonialResponse;
 import com.suza.wasteX.customException.NotFoundException;
 import com.suza.wasteX.wastex_site_api.services.TestimonialService;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

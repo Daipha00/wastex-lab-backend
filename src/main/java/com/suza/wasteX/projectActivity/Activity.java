@@ -56,7 +56,8 @@ public class Activity extends Auditable {
         private Project project;
         @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true)
         private List<ActivityStatus> statuses;
-        @ManyToMany
+
+        @ManyToMany(fetch = FetchType.EAGER)
         @JoinTable(
                 name = "activity_sponsors",
                 joinColumns = @JoinColumn(name = "activity"),

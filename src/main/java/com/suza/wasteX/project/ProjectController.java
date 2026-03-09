@@ -2,9 +2,6 @@ package com.suza.wasteX.project;
 
 import com.suza.wasteX.DTO.*;
 import com.suza.wasteX.DTO.StatusDto.ProjectStatusRequest;
-import com.suza.wasteX.DTO.StatusDto.ProjectStatusResponse;
-import com.suza.wasteX.projectActivity.Activity;
-import com.suza.wasteX.statuses.projectStatus.ProjectStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -22,6 +19,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/projects/")
+@CrossOrigin(origins = "http://localhost:4200")
 @Tag(name = "Project API", description = "This is API Collection for Manage Project")
 public class ProjectController {
     private final ProjectService projectService;
@@ -69,23 +67,6 @@ public class ProjectController {
     public ResponseEntity<ProjectResponse> getProjectById(@PathVariable Long id) {
         ProjectResponse response = projectService.getProjectById(id);
         return response != null ? ResponseEntity.ok(response) : ResponseEntity.notFound().build();
-
-    }
-
-    @Operation(
-            summary = "update a project",
-            description = "This endpoint is for update an existing particular project"
-    )
-    @ApiResponses( {
-            @ApiResponse(responseCode = "200", content = { @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = ProjectResponse.class))}),
-            @ApiResponse(responseCode = "404", description = "Project not found", content = @Content)
-    })
-    @PutMapping("{id}")
-    public ResponseEntity<ProjectResponse> updateProject(@PathVariable Long id ,@RequestBody ProjectRequest request) {
-        ProjectResponse response = projectService.updateProject(id,request);
-        return response != null ? ResponseEntity.ok(response) : ResponseEntity.notFound().build();
-
     }
 
     @Operation(
@@ -149,10 +130,14 @@ public ResponseEntity<ProjectResponse> addProjectSponsors(
     @PutMapping("{projectId}/sponsors")
     public ResponseEntity<ProjectResponse> updateProjectSponsors(
             @PathVariable Long projectId,
-            @RequestBody List<Long> sponsorIds) {
-        ProjectResponse response = projectService.updateProjectSponsors(projectId, sponsorIds);
+            @RequestBody List<String> sponsorNames) {
+
+        ProjectResponse response =
+                projectService.updateProjectSponsors(projectId, sponsorNames);
+
         return ResponseEntity.ok(response);
     }
+
 
     @Operation(summary = "add new project activity",
             description = "This endpoint is for add new project activity"
@@ -168,5 +153,12 @@ public ResponseEntity<ProjectResponse> addProjectSponsors(
         ProjectResponse response = projectService.addActivityToProject(projectId, activityRequest);
         return response != null ? ResponseEntity.ok(response) : ResponseEntity.notFound().build();
     }
+
+    @PutMapping("{id}")
+    public ResponseEntity<ProjectResponse> updateProject(@PathVariable Long id, @RequestBody ProjectRequest request) {
+        ProjectResponse response = projectService.updateProject(id, request);
+        return response != null ? ResponseEntity.ok(response) : ResponseEntity.notFound().build();
+    }
+
 
 }

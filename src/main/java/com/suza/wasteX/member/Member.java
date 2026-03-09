@@ -1,6 +1,7 @@
 package com.suza.wasteX.member;
 
 import com.suza.wasteX.audit.Auditable;
+import com.suza.wasteX.project.Project;
 import com.suza.wasteX.projectActivity.Activity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -50,4 +51,18 @@ public class Member extends Auditable {
     @ManyToOne
     @JoinColumn(name = "activity")
     private Activity activity;
+
+    @ManyToOne
+    @JoinColumn(name = "project_id", nullable = false)
+    private Project project;
+
+    public enum MemberStatus {
+        PENDING,
+        ACCEPTED,
+        REJECTED
+    }
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private MemberStatus status = MemberStatus.PENDING;
 }

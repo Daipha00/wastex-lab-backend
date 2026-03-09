@@ -16,10 +16,11 @@ import java.util.List;
 public class ProjectRequest {
     private String projectName;
     private double projectBudget;
-    private List<Long> projectSponsor;
+    private List<String> projectSponsor;
     private String description;
     private boolean active;
     private Date startDate;
     private Date endDate;
+    private String typeName;
     private List<ProjectStatusRequest> statuses;
 }

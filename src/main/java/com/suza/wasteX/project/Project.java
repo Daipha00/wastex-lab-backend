@@ -1,6 +1,7 @@
 package com.suza.wasteX.project;
 
 import com.suza.wasteX.audit.Auditable;
+import com.suza.wasteX.member.Member;
 import com.suza.wasteX.partner.Partner;
 import com.suza.wasteX.projectActivity.Activity;
 import com.suza.wasteX.projectType.Type;
@@ -43,10 +44,10 @@ public class Project extends Auditable {
     @ManyToMany
     @JoinTable(
             name = "project_sponsors",
-            joinColumns = @JoinColumn(name = "project"),
-            inverseJoinColumns = @JoinColumn(name = "sponsor")
+            joinColumns = @JoinColumn(name = "project_id"),
+            inverseJoinColumns = @JoinColumn(name = "sponsor_id")
     )
-    private List<Sponsor> projectSponsor;
+    private List<Sponsor> projectSponsor = new ArrayList<>();
     @Size(min = 50, max = 1000)
     @Column(name = "project_description")
     private String description;
@@ -58,9 +59,14 @@ public class Project extends Auditable {
     private Date endDate;
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
     private List<Activity> activities;
-    @OneToMany(mappedBy = "project")
-    private List<Type> types;
+    @ManyToOne
+    @JoinColumn(name = "type_id", nullable = false)
+    private Type type;
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProjectStatus> statuses;
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Member> members = new ArrayList<>();
+
 
 }

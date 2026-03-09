@@ -1,5 +1,6 @@
 package com.suza.wasteX.statuses;
 
+import com.suza.wasteX.statuses.projectStatus.StatusName;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,5 +17,9 @@ public class Status {
             strategy = GenerationType.IDENTITY
     )
     private Long id;
-    private String name;
+
+    @Enumerated(EnumType.STRING)
+    @Column(unique = true, nullable = false)
+    private StatusName name;
+
 }

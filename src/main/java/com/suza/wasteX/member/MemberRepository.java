@@ -32,4 +32,8 @@ public interface MemberRepository extends JpaRepository<Member,Long> {
 
     @Query("SELECT COUNT(m) FROM Member m WHERE m.gender = 'Female'")
     Long countFemaleMembers();
+
+    List<Member> findByProjectId(Long projectId);
+
+    List<Member> findByEmail(String email);
 }

@@ -1,10 +1,13 @@
 package com.suza.wasteX.project;
 
 import com.suza.wasteX.DTO.*;
+import java.util.ArrayList;
 import com.suza.wasteX.DTO.StatusDto.ProjectStatusRequest;
 import com.suza.wasteX.customException.NotFoundException;
 import com.suza.wasteX.projectActivity.Activity;
 import com.suza.wasteX.projectActivity.ActivityRepository;
+import com.suza.wasteX.projectType.Type;
+import com.suza.wasteX.projectType.TypeRepository;
 import com.suza.wasteX.sponsor.Sponsor;
 import com.suza.wasteX.sponsor.SponsorRepository;
 import com.suza.wasteX.statuses.Status;
@@ -12,6 +15,7 @@ import com.suza.wasteX.statuses.StatusRepository;
 import com.suza.wasteX.statuses.activityStatus.ActivityStatus;
 import com.suza.wasteX.statuses.projectStatus.ProjectStatus;
 import com.suza.wasteX.statuses.projectStatus.ProjectStatusRepository;
+import com.suza.wasteX.statuses.projectStatus.StatusName;
 import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
 import lombok.Builder;
@@ -19,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,6 +38,8 @@ public class ProjectService {
     private final ActivityRepository activityRepository;
     private final SponsorRepository sponsorRepository;
     private final ModelMapper modelMapper;
+    private final TypeRepository typeRepository;
+
     @Transactional
    public List<ProjectResponse> getAllProjects() {
         List<Project> projects = projectRepository.findAll();
@@ -40,23 +47,31 @@ public class ProjectService {
                .stream().map(project -> modelMapper.map(project, ProjectResponse.class))
                .collect(Collectors.toList());
    }
+
+
+
     @Transactional
     public ProjectResponse createProject(ProjectRequest request) {
         Project project = modelMapper.map(request, Project.class);
 
+        // --- Handle Sponsors ---
         List<Sponsor> sponsors = Optional.ofNullable(request.getProjectSponsor())
-                .orElse(List.of()) // or `Collections.emptyList()`
+                .orElse(List.of())
                 .stream()
-                .map(id -> sponsorRepository.findById(id)
+                .map(name -> sponsorRepository.findByName(name)
                         .orElseThrow(() -> {
-                            log.info("Sponsor with id {} is not found", id);
-                            return new NotFoundException("Sponsor id is not found");
+                            log.info("Sponsor with name {} is not found", name);
+                            return new NotFoundException("Sponsor name is not found");
                         }))
                 .toList();
+        project.setProjectSponsor(sponsors);
 
-        if (request.getStatuses() != null) {
+        // --- Handle Status ---
+        List<ProjectStatus> statuses;
+
+        if (request.getStatuses() != null && !request.getStatuses().isEmpty()) {
             Project finalProject = project;
-            List<ProjectStatus> statuses = request.getStatuses().stream()
+            statuses = request.getStatuses().stream()
                     .map(statusRequest -> {
                         ProjectStatus status = new ProjectStatus();
                         Status statusEntity = statusRepository.findById(statusRequest.getId())
@@ -70,39 +85,38 @@ public class ProjectService {
                         return status;
                     })
                     .collect(Collectors.toList());
-            project.setStatuses(statuses);
+        } else {
+            // Default status as PENDING
+            Status defaultStatus = statusRepository.findByName(StatusName.PENDING)
+                    .orElseThrow(() -> new NotFoundException("Default 'Pending' status not found"));
+
+            ProjectStatus defaultProjectStatus = new ProjectStatus();
+            defaultProjectStatus.setStatus(defaultStatus);
+            defaultProjectStatus.setStatusDate(request.getStartDate());
+            defaultProjectStatus.setProject(project);
+
+            statuses = List.of(defaultProjectStatus);
+        }
+        project.setStatuses(statuses);
+
+        // --- Handle Type ---
+        if (request.getTypeName() != null && !request.getTypeName().isBlank()) {
+            Type type = typeRepository.findByName(request.getTypeName())
+                    .orElseThrow(() -> new NotFoundException("Type not found: " + request.getTypeName()));
+
+            project.setType(type); // ✅ assign type to project
         }
 
-        project.setProjectSponsor(sponsors);
+
+        // --- Save Project ---
         project = projectRepository.save(project);
+
         return modelMapper.map(project, ProjectResponse.class);
     }
 
-    @Transactional
-    public ProjectResponse updateProject(Long id, ProjectRequest request) {
-        Project project = projectRepository.findById(id)
-                .orElseThrow(()-> {
-                    log.info("Project with id {} is not found", id);
-                    return new NotFoundException("Project id is not found");
-                });
 
-        project.setProjectName(request.getProjectName());
-        project.setProjectBudget(request.getProjectBudget());
-        project.setDescription(request.getDescription());
-        project.setActive(request.isActive());
-        project.setStartDate(request.getStartDate());
-        project.setEndDate(request.getEndDate());
-        List<Sponsor> sponsors = request.getProjectSponsor()
-                .stream()
-                .map(sponsorId -> sponsorRepository.findById(sponsorId).orElseThrow(() -> {
-                    log.info("Sponsor with id {} is not found", sponsorId);
-                    return new NotFoundException("Sponsor id is not found");
-                })).toList();
-                project.setProjectSponsor(sponsors);
-                project = projectRepository.save(project);
-                return modelMapper.map(project, ProjectResponse.class);
 
-    }
+
     @Transactional
     public ProjectResponse getProjectById(Long id) {
         Optional<Project> projectOptional = projectRepository.findById(id);
@@ -113,7 +127,7 @@ public class ProjectService {
         }
 
         ProjectResponse response = modelMapper.map(projectOptional.get(), ProjectResponse.class);
-        response.setTypes(response.getTypes().stream().toList());
+        response.setType(response.getType());
         response.setActivities(response.getActivities().stream().toList());
         response.setStatuses(response.getStatuses().stream().toList());
         return response;
@@ -154,24 +168,31 @@ public class ProjectService {
     }
 
     @Transactional
-    public ProjectResponse updateProjectSponsors(Long projectId, List<Long> sponsorIds) {
-        Project project = projectRepository.findById(projectId).orElseThrow(() -> {
-            log.info("Project with id {} is not found", projectId);
-            return new NoResultException("Project id is not found");
-        });
+    public ProjectResponse updateProjectSponsors(Long projectId, List<String> sponsorNames) {
 
-        List<Sponsor> sponsors = sponsorIds.stream()
-                .map(id -> sponsorRepository.findById(id).orElseThrow(() -> {
-                    log.info("Sponsor with id {} is not found", projectId);
-                    return new NotFoundException("Sponsor id is not found");
-                } ))
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> {
+                    log.info("Project with id {} is not found", projectId);
+                    return new NoResultException("Project id is not found");
+                });
+
+        List<Sponsor> sponsors = Optional.ofNullable(sponsorNames)
+                .orElse(List.of())
+                .stream()
+                .map(name -> sponsorRepository.findByName(name)
+                        .orElseThrow(() -> {
+                            log.info("Sponsor with name {} is not found", name);
+                            return new NotFoundException("Sponsor not found: " + name);
+                        }))
                 .collect(Collectors.toList());
 
         project.setProjectSponsor(sponsors);
-        project = projectRepository.save(project);
 
-        return modelMapper.map(project, ProjectResponse.class);
+        Project updatedProject = projectRepository.save(project);
+
+        return modelMapper.map(updatedProject, ProjectResponse.class);
     }
+
     @Transactional
     public ProjectResponse addActivityToProject(Long projectId, ActivityRequest request) {
         Project project  = projectRepository.findById(projectId)
@@ -233,6 +254,49 @@ public Long countTotalProjects() {
         return activityRepository.countActivitiesByProjectId(projectId);
     }
 
+    @Transactional
+    public ProjectResponse updateProject(Long id, ProjectRequest request) {
+        // Fetch the existing project
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.info("Project with id {} is not found", id);
+                    return new NotFoundException("Project id is not found");
+                });
 
+        // Update basic project fields
+        project.setProjectName(request.getProjectName());
+        project.setProjectBudget(request.getProjectBudget());
+        project.setDescription(request.getDescription());
+        project.setActive(request.isActive());
+        project.setStartDate(request.getStartDate());
+        project.setEndDate(request.getEndDate());
+
+        if (request.getProjectSponsor() != null && !request.getProjectSponsor().isEmpty()) {
+            List<Sponsor> sponsors = request.getProjectSponsor().stream()
+                    .map(name -> sponsorRepository.findByName(name)
+                            .orElseThrow(() -> {
+                                log.info("Sponsor with name {} is not found", name);
+                                return new NotFoundException("Sponsor not found: " + name);
+                            }))
+                    .collect(Collectors.toCollection(ArrayList::new)); // ✅ MUTABLE
+
+            project.getProjectSponsor().clear();   // ✅ safe
+            project.getProjectSponsor().addAll(sponsors);
+        }
+
+
+
+        // Update type if provided
+        if (request.getTypeName() != null && !request.getTypeName().isBlank()) {
+            Type type = typeRepository.findByName(request.getTypeName())
+                    .orElseThrow(() -> new NotFoundException("Type not found: " + request.getTypeName()));
+            project.setType(type);   // assign type to project
+        }
+
+        // Save updated project
+        project = projectRepository.save(project);
+
+        return modelMapper.map(project, ProjectResponse.class);
+    }
 
 }
