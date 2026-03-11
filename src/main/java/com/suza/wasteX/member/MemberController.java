@@ -95,22 +95,6 @@ public class MemberController {
         return response!= null ? ResponseEntity.ok(response) : ResponseEntity.notFound().build();
     }
 
-//    @Operation(
-//            summary = "update a member",
-//            description = "This endpoint is for a member of a particular project activity"
-//    )
-//    @ApiResponses( {
-//            @ApiResponse(responseCode = "200",description = "Member created successful", content = {
-//                    @Content(mediaType = "application/json",
-//                            schema = @Schema(implementation = MemberResponse.class)) }),
-//
-//            @ApiResponse(responseCode = "404",description = "Member not Found", content = @Content)
-//    })
-//    @PutMapping("{activityId}/{id}")
-//    ResponseEntity<MemberResponse> updateMember(@PathVariable Long activityId, @PathVariable Long id, @RequestBody MemberRequest request) {
-//        MemberResponse response = memberService.updateMember(activityId,id,request);
-//        return response!= null ? ResponseEntity.ok(response) : ResponseEntity.notFound().build();
-//    }
 
     @Operation(
             summary = "delete a member",
@@ -164,15 +148,6 @@ public class MemberController {
 
         return ResponseEntity.ok(response);
     }
-
-//    @PutMapping("{id}")
-//    public ResponseEntity<MemberResponse> updateMember(
-//            @PathVariable Long id,
-//            @RequestBody MemberRequest request) {
-//
-//        MemberResponse response = memberService.updateMember(id, request);
-//        return ResponseEntity.ok(response);
-//    }
 
     @GetMapping("me")
     public List<MemberResponse> getMyParticipations(@RequestParam String email) {
