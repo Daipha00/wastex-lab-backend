@@ -16,7 +16,7 @@ import java.util.List;
         @Bean
         public OpenAPI defineOpenApi() {
             Server server = new Server();
-            server.setUrl("http://localhost:8080");
+            server.setUrl("https://wastex-lab-backend.onrender.com");
             server.setDescription("Development");
 
             Contact myContact = new Contact();
