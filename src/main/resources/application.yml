@@ -25,10 +25,11 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://dpg-d6oomj94tr6s738s4jkg-a:5432/wastex_bh7m
+    url: "jdbc:postgresql://dpg-d6oomj94tr6s738s4jkg-a.frankfurt-postgres.render.com:5432/wastex_bh7m?sslmode=require"
     username: wastex_user
     password: mlRV1t8q2nSdvSKFLwREvxiMd3ZC3Rf3
     driver-class-name: org.postgresql.Driver
+
   jpa:
     hibernate:
       ddl-auto: update
