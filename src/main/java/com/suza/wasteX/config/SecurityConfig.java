@@ -66,6 +66,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/","/api/**","api/**","/api/users/register", "/api/users/login",
                                 "/api/users/count","/api/v1/projects/","/api/v1/members/","/api/v1/members/",
                                 "/api/v1/members/{activityId}","/api/v1/members/activity/{activityId}","/api/v1/members/**",
@@ -93,7 +94,6 @@ public class SecurityConfig {
                                 "api/v1/testimonials/{id}",
                                 "api/v1/activities/","api/v1/activities/{projectId}",
                                 "api/v1/activities/{activityId}",
-
                                 "api/v1/activities/{projectId}/{activityId}","/api/v1/projects/{id}",
                                 "api/v1/activities/status/{id}","api/v1/activities/{activityId}/sponsors",
                                 "api/v1/activities/{projectId}/sponsors","api/v1/activities/project/{projectId}",
@@ -103,7 +103,6 @@ public class SecurityConfig {
                                 "/api/v1/galleries",
                                 "/api/partners/{id}", "/api/partners/{id}/image",
                                 "/api/v1/projects/{projectId}/activities").permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 );
 
