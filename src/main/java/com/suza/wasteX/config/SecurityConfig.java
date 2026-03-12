@@ -35,10 +35,12 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("*"));
+        // Ruhusu Angular local testing
+        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(false);
+        configuration.setAllowCredentials(true); // Ruhusu headers kama Authorization
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
@@ -67,7 +69,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/","/api/**","api/**","/api/users/register", "/api/users/login",
+                        .requestMatchers("/","/health","/api/**","api/**","/api/users/register", "/api/users/login",
                                 "/api/users/count","/api/v1/projects/","/api/v1/members/","/api/v1/members/",
                                 "/api/v1/members/{activityId}","/api/v1/members/activity/{activityId}","/api/v1/members/**",
                                 "api/v1/member/counts/","api/v1/types/","api/v1/member/counts/{activityId}",
@@ -104,7 +106,12 @@ public class SecurityConfig {
                                 "/api/partners/{id}", "/api/partners/{id}/image",
                                 "/api/v1/projects/{projectId}/activities").permitAll()
                         .anyRequest().authenticated()
-                );
+
+
+                )
+                .httpBasic(basic -> basic.disable())
+                .formLogin(form -> form.disable());
+
 
         return http.build();
     }

@@ -11,4 +11,9 @@ public class RootController {
     public String home() {
         return "Welcome to WasteX Backend!";
     }
+
+    @GetMapping("/health")
+    public String health() {
+        return "OK";  // hii endpoint ni safi kwa Render health check
+    }
 }
