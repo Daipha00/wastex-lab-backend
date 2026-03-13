@@ -1,27 +1,27 @@
 server:
   port: ${PORT:9090}
 
-spring:
-  main:
-    web-application-type: servlet
-  application:
-    name: wastex_lab
-  datasource:
-    driver-class-name: org.postgresql.Driver
-    password: Agness@1973
-    url: jdbc:postgresql://localhost:8080/wastex?currentSchema=public
-    username: postgres
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        format_sql: true
-        jdbc:
-          lob:
-            non_contextual_creation: true
-    show-sql: true
+#spring:
+#  main:
+#    web-application-type: servlet
+#  application:
+#    name: wastex_lab
+#  datasource:
+#    driver-class-name: org.postgresql.Driver
+#    password: Agness@1973
+#    url: jdbc:postgresql://localhost:8080/wastex?currentSchema=public
+#    username: postgres
+#  jpa:
+#    database-platform: org.hibernate.dialect.PostgreSQLDialect
+#    hibernate:
+#      ddl-auto: update
+#    properties:
+#      hibernate:
+#        format_sql: true
+#        jdbc:
+#          lob:
+#            non_contextual_creation: true
+#    show-sql: true
 
 spring:
   datasource:
